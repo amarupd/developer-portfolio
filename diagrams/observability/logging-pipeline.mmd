@@ -1,0 +1,19 @@
+flowchart TD
+
+    App[Application Services]
+
+    Logger[Log Collector]
+
+    Stream[Log Streaming System]
+
+    Storage[Log Storage]
+
+    Query[Log Query System]
+
+    Dashboard[Dashboard]
+
+    App --> Logger
+    Logger --> Stream
+    Stream --> Storage
+    Storage --> Query
+    Query --> Dashboard

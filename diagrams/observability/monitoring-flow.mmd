@@ -1,0 +1,16 @@
+flowchart TD
+
+    Services[Services]
+
+    Metrics[Metrics Collector]
+
+    TSDB[Time Series DB]
+
+    Alert[Alerting System]
+
+    Dashboard[Monitoring Dashboard]
+
+    Services --> Metrics
+    Metrics --> TSDB
+    TSDB --> Dashboard
+    TSDB --> Alert

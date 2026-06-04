@@ -1,0 +1,17 @@
+flowchart TD
+
+    Producer[API / Producer]
+
+    Queue[Message Queue]
+
+    Worker1[Worker 1]
+    Worker2[Worker 2]
+
+    DB[(Database)]
+
+    Producer --> Queue
+    Queue --> Worker1
+    Queue --> Worker2
+
+    Worker1 --> DB
+    Worker2 --> DB

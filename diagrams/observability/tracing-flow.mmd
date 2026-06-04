@@ -1,0 +1,18 @@
+flowchart TD
+
+    Request[User Request]
+
+    API[API Gateway]
+
+    ServiceA[Service A]
+    ServiceB[Service B]
+
+    Trace[Tracing System]
+
+    Request --> API
+    API --> ServiceA
+    ServiceA --> ServiceB
+
+    API --> Trace
+    ServiceA --> Trace
+    ServiceB --> Trace

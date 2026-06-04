@@ -1,0 +1,26 @@
+flowchart TD
+
+    Client[Client Apps]
+
+    APIGateway[API Gateway]
+
+    AuthService[Auth Service]
+    UserService[User Service]
+    CoreAPI[Core Backend Service]
+
+    DB[(MySQL Database)]
+    Cache[(Redis Cache)]
+
+    MQ[(Message Queue)]
+
+    Client --> APIGateway
+
+    APIGateway --> AuthService
+    APIGateway --> UserService
+    APIGateway --> CoreAPI
+
+    CoreAPI --> DB
+    CoreAPI --> Cache
+    CoreAPI --> MQ
+
+    MQ --> CoreAPI

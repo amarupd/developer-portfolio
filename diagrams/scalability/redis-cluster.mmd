@@ -1,0 +1,15 @@
+flowchart TD
+
+    App[Application]
+
+    RedisCluster[Redis Cluster]
+
+    Node1[Node 1]
+    Node2[Node 2]
+    Node3[Node 3]
+
+    App --> RedisCluster
+
+    RedisCluster --> Node1
+    RedisCluster --> Node2
+    RedisCluster --> Node3

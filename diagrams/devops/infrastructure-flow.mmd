@@ -1,0 +1,19 @@
+flowchart TD
+
+    Dev[Developer]
+
+    CI[CI/CD Pipeline]
+
+    Infra[Infrastructure as Code]
+
+    Cloud[Cloud Provider]
+
+    K8S[Kubernetes Cluster]
+
+    Services[Microservices]
+
+    Dev --> CI
+    CI --> Infra
+    Infra --> Cloud
+    Cloud --> K8S
+    K8S --> Services

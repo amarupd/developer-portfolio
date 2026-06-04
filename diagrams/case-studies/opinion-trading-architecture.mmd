@@ -1,0 +1,34 @@
+flowchart TD
+
+    User[Users]
+
+    API[API Gateway]
+
+    MarketService[Market Service]
+    TradeEngine[Trade Execution Engine]
+    RiskService[Risk Management Service]
+
+    WalletService[Wallet Service]
+
+    DB[(Database Cluster)]
+    MQ[(Event Queue)]
+    Redis[(Cache Layer)]
+
+    User --> API
+
+    API --> MarketService
+    API --> TradeEngine
+    API --> WalletService
+
+    MarketService --> MQ
+    TradeEngine --> MQ
+    RiskService --> MQ
+
+    MQ --> TradeEngine
+    MQ --> RiskService
+
+    TradeEngine --> WalletService
+    WalletService --> DB
+
+    MarketService --> Redis
+    TradeEngine --> Redis

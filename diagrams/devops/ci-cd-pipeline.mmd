@@ -1,0 +1,25 @@
+flowchart TD
+
+    Dev[Developer]
+
+    Git[Git Repository]
+
+    Build[CI Build Server]
+
+    Test[Automated Tests]
+
+    Docker[Docker Build]
+
+    Registry[Container Registry]
+
+    Deploy[Deployment System]
+
+    Prod[Production Cluster]
+
+    Dev --> Git
+    Git --> Build
+    Build --> Test
+    Test --> Docker
+    Docker --> Registry
+    Registry --> Deploy
+    Deploy --> Prod

@@ -1,0 +1,40 @@
+flowchart TD
+
+    User[User]
+
+    CDN[CDN Layer]
+
+    API[API Gateway]
+
+    ProductService[Product Service]
+    CartService[Cart Service]
+    CheckoutService[Checkout Service]
+    OrderService[Order Service]
+
+    InventoryService[Inventory Service]
+    PaymentService[Payment Service]
+
+    DB[(MySQL Cluster)]
+    Redis[(Redis Cache)]
+
+    MQ[(Event Queue)]
+
+    User --> CDN --> API
+
+    API --> ProductService
+    API --> CartService
+    API --> CheckoutService
+
+    CheckoutService --> InventoryService
+    CheckoutService --> PaymentService
+    CheckoutService --> OrderService
+
+    ProductService --> DB
+    CartService --> Redis
+    OrderService --> DB
+    InventoryService --> DB
+    PaymentService --> DB
+
+    OrderService --> MQ
+    PaymentService --> MQ
+    InventoryService --> MQ

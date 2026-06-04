@@ -1,0 +1,14 @@
+flowchart TD
+
+    User[User Requests]
+
+    LB[Load Balancer]
+
+    ServerA[Server A]
+    ServerB[Server B]
+    ServerC[Server C]
+
+    User --> LB
+    LB --> ServerA
+    LB --> ServerB
+    LB --> ServerC

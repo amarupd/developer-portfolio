@@ -1,0 +1,33 @@
+flowchart TD
+
+    User[Mobile/Web Users]
+
+    API[API Gateway]
+
+    MatchService[Match Service]
+    PlayerStats[Player Stats Service]
+    ScoringEngine[Scoring Engine]
+
+    Redis[(Redis Cache)]
+    DB[(MySQL Database)]
+
+    MQ[(Event Stream / Queue)]
+
+    Realtime[WebSocket Server]
+
+    User --> API
+
+    API --> MatchService
+    API --> PlayerStats
+
+    MatchService --> MQ
+    PlayerStats --> MQ
+
+    MQ --> ScoringEngine
+
+    ScoringEngine --> Redis
+    ScoringEngine --> DB
+
+    ScoringEngine --> Realtime
+
+    Realtime --> User

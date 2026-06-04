@@ -1,0 +1,14 @@
+flowchart TD
+
+    Client[Client]
+
+    API[API Server]
+
+    Cache[Redis Cache]
+
+    DB[(Database)]
+
+    Client --> API
+    API --> Cache
+    Cache --> API
+    API --> DB

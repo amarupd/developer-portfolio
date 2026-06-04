@@ -1,0 +1,16 @@
+flowchart TD
+
+    Dev[Developer]
+
+    Git[Git Repo]
+
+    CI[CI Pipeline]
+    Docker[Docker Build]
+
+    Registry[Container Registry]
+
+    K8S[Kubernetes Cluster]
+
+    Prod[Production]
+
+    Dev --> Git --> CI --> Docker --> Registry --> K8S --> Prod

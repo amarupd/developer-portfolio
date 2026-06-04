@@ -1,0 +1,17 @@
+flowchart TD
+
+    LB[Load Balancer]
+
+    App1[App Instance 1]
+    App2[App Instance 2]
+    App3[App Instance 3]
+
+    DB[(Shared Database)]
+
+    LB --> App1
+    LB --> App2
+    LB --> App3
+
+    App1 --> DB
+    App2 --> DB
+    App3 --> DB

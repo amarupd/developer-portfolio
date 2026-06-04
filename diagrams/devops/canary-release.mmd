@@ -1,0 +1,18 @@
+flowchart TD
+
+    User[Users]
+
+    Router[Traffic Router]
+
+    Stable[Stable Version]
+
+    Canary[Canary Version]
+
+    Metrics[Monitoring System]
+
+    User --> Router
+    Router --> Stable
+    Router --> Canary
+
+    Canary --> Metrics
+    Stable --> Metrics

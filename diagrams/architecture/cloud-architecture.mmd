@@ -1,0 +1,19 @@
+flowchart TD
+
+    Users[Users Worldwide]
+
+    CDN[CDN Layer]
+
+    LB[Load Balancer]
+
+    App[Application Servers]
+
+    DB[(Database Cluster)]
+    Cache[(Redis Cluster)]
+    Storage[(Object Storage S3)]
+
+    Users --> CDN --> LB --> App
+
+    App --> DB
+    App --> Cache
+    App --> Storage

@@ -1,0 +1,26 @@
+flowchart TD
+
+    Gateway[API Gateway]
+
+    Auth[Auth Service]
+    User[User Service]
+    Order[Order Service]
+    Payment[Payment Service]
+    Notification[Notification Service]
+
+    MQ[(Event Bus / Kafka)]
+    DB[(Databases)]
+
+    Gateway --> Auth
+    Gateway --> User
+    Gateway --> Order
+    Gateway --> Payment
+
+    Order --> MQ
+    Payment --> MQ
+    MQ --> Notification
+
+    Auth --> DB
+    User --> DB
+    Order --> DB
+    Payment --> DB

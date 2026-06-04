@@ -1,0 +1,19 @@
+flowchart TD
+
+    User[Users]
+
+    LB[Load Balancer]
+
+    Blue[Blue Environment (Live)]
+    Green[Green Environment (New Version)]
+
+    Switch[Traffic Switch]
+
+    User --> LB
+    LB --> Blue
+
+    Blue --> Switch
+    Green --> Switch
+
+    Switch --> Blue
+    Switch --> Green

@@ -1,0 +1,13 @@
+flowchart TD
+
+    Metrics[Metrics System]
+
+    Rules[Alert Rules Engine]
+
+    Alert[Alert Manager]
+
+    Slack[Slack / Email / PagerDuty]
+
+    Metrics --> Rules
+    Rules --> Alert
+    Alert --> Slack

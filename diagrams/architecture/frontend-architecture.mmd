@@ -1,0 +1,16 @@
+flowchart TD
+
+    Browser[Browser / App]
+
+    Next[Next.js App]
+
+    API[Backend APIs]
+
+    State[State Management]
+
+    Cache[Client Cache]
+
+    Browser --> Next
+    Next --> API
+    Next --> State
+    State --> Cache
