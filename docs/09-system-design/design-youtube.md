@@ -1,19 +1,24 @@
-# System Design: Instagram-like Platform
+# System Design: YouTube-like Video Platform
 
-![Instagram System Design](../../assets/instagram-system-design.png)
+![YouTube System Design](../../assets/youtube-system-design.png)
 
 ## Overview
 
-Designing an Instagram-like platform focuses heavily on:
+Designing a YouTube-like platform is a large-scale distributed systems problem focused on:
 
-* Media storage and delivery
-* Feed generation at scale
-* High-throughput image/video uploads
-* CDN optimization
-* Social graph interactions
-* Realtime engagement systems
+* Video ingestion and upload pipelines
+* Transcoding and encoding systems
+* Global CDN distribution
+* High-throughput streaming delivery
+* Recommendation systems
+* Watch history tracking
+* Live streaming infrastructure
 
-Unlike text-heavy platforms, Instagram is fundamentally a **media distribution system** where bandwidth, storage, and delivery latency dominate architectural decisions.
+Unlike image-based platforms, video systems introduce significantly higher challenges in:
+
+```text id="video_scale"
+Storage Cost + Bandwidth + Encoding Complexity + Latency Constraints
+```
 
 ---
 
@@ -21,71 +26,71 @@ Unlike text-heavy platforms, Instagram is fundamentally a **media distribution s
 
 ### Functional Requirements
 
-* Upload photos/videos
-* View personalized feed
-* Like and comment on posts
-* Follow/unfollow users
-* Stories (ephemeral content)
-* Explore/trending content
-* Realtime notifications
+* Upload videos
+* Stream videos
+* Search videos
+* Like, comment, subscribe
+* View recommendations
+* Live streaming support
+* Watch history tracking
 
 ---
 
 ### Non-Functional Requirements
 
+* Massive scalability (billions of views)
+* Low buffering playback
+* Global content delivery
 * High availability
-* Low latency media delivery
-* Massive storage scalability
-* Efficient CDN utilization
-* Eventual consistency for feeds
-* Global content distribution
+* Fault-tolerant processing pipelines
+* Efficient storage and encoding
 
 ---
 
 # High-Level Architecture
 
-![Instagram System Design](../../assets/instagram-system-design.png)
+![YouTube System Design](../../assets/youtube-system-design.png)
 
-```mermaid
+```mermaid id="yt_arch_01"
 flowchart TD
 
     User
 
     API
 
-    MediaService
+    UploadService
 
-    FeedService
+    TranscodingService
 
-    SocialGraphService
-
-    Cache
-
-    Database
+    VideoStorage
 
     CDN
 
-    RealtimeLayer
+    MetadataDB
+
+    RecommendationEngine
+
+    RealtimeService
 
     User --> API
 
-    API --> MediaService
+    API --> UploadService
 
-    API --> FeedService
+    UploadService --> VideoStorage
 
-    API --> SocialGraphService
+    UploadService --> TranscodingService
 
-    MediaService --> CDN
+    TranscodingService --> CDN
 
-    MediaService --> Database
+    API --> MetadataDB
 
-    FeedService --> Cache
+    API --> RecommendationEngine
 
-    FeedService --> Database
+    RecommendationEngine --> MetadataDB
 
-    FeedService --> RealtimeLayer
+    CDN --> User
 
-    RealtimeLayer --> User
+    RealtimeService --> User
 ```
 
 ---
@@ -94,284 +99,333 @@ flowchart TD
 
 ---
 
-## Media Service
+## Upload Service
 
 Responsible for:
 
-* Image/video uploads
-* Compression
-* Thumbnail generation
-* Metadata storage
+* Receiving video uploads
+* Chunked upload handling
+* Validating file integrity
+* Initiating encoding pipeline
+
+---
+
+## Transcoding Service
+
+One of the most critical components.
+
+### Responsibilities:
+
+* Convert video into multiple resolutions:
+
+  * 240p
+  * 480p
+  * 720p
+  * 1080p
+  * 4K
+
+* Optimize compression
+
+* Generate adaptive bitrate streams
+
+---
+
+## Video Storage
+
+Stores:
+
+* Raw uploaded video
+* Transcoded segments
+* Metadata references
 
 ---
 
 ## CDN Layer
 
-Serves:
-
-* Images
-* Videos
-* Thumbnails
-
-### Benefits
-
-* Reduced latency
-* Offloaded origin servers
-* Global distribution
-
----
-
-## Feed Service
-
-Responsible for:
-
-* Home feed generation
-* Ranking posts
-* Caching feeds
-
----
-
-## Social Graph Service
-
 Handles:
 
-* Followers
-* Following relationships
-* Suggestions
+* Global video delivery
+* Edge caching
+* Adaptive streaming segments
 
 ---
 
-# Media Upload Flow
+# Video Upload Flow
 
-```mermaid
+```mermaid id="yt_upload_flow"
 sequenceDiagram
 
-    User->>API: Upload Image
+    User->>API: Upload Video (Chunked)
 
-    API->>MediaService: Process Upload
+    API->>UploadService: Receive Chunks
 
-    MediaService->>Storage: Save Original
+    UploadService->>Storage: Store Raw Video
 
-    MediaService->>CDN: Distribute Asset
+    UploadService->>TranscodingService: Trigger Encoding Pipeline
 
-    MediaService->>Database: Save Metadata
+    TranscodingService->>CDN: Store Encoded Segments
 
-    MediaService-->>User: Upload Complete
+    UploadService-->>User: Upload Complete
 ```
 
 ---
 
-# Feed Generation Strategy
+# Video Streaming Architecture
 
-Instagram uses a hybrid feed system.
+Streaming is optimized using segmented delivery.
 
 ---
 
-## Fan-out on Write
+## HLS/DASH Streaming
 
-Used for:
+Videos are split into small chunks:
 
-* Normal users
-* Low follower accounts
-
-### Flow
-
-```text
-User Post → Push to Followers Feed
+```text id="segments"
+Segment 1
+Segment 2
+Segment 3
+...
 ```
 
 ---
 
-## Fan-out on Read
+## Benefits
 
-Used for:
+* Adaptive bitrate switching
+* Reduced buffering
+* CDN efficiency
 
-* High follower accounts (influencers)
+---
 
-### Flow
+# CDN-Based Delivery
 
-```text
-User opens feed → Fetch posts dynamically
+![CDN Architecture](../../assets/caching-strategy.png)
+
+---
+
+## Flow
+
+```mermaid id="yt_cdn_flow"
+flowchart LR
+
+    User
+
+    CDN
+
+    OriginStorage
+
+    User --> CDN
+
+    CDN --> OriginStorage
 ```
 
 ---
 
-## Hybrid Model
+## Benefits
 
-```text
-Balance between write and read scalability
+* Low latency playback
+* Reduced origin load
+* Global scalability
+
+---
+
+# Transcoding Pipeline
+
+---
+
+## Problem
+
+Raw videos cannot be streamed efficiently.
+
+---
+
+## Solution
+
+Distributed encoding pipeline:
+
+```mermaid id="yt_transcode"
+flowchart TD
+
+    RawVideo
+
+    Queue
+
+    Encoder1
+
+    Encoder2
+
+    Encoder3
+
+    CDN
+
+    RawVideo --> Queue
+
+    Queue --> Encoder1
+
+    Queue --> Encoder2
+
+    Queue --> Encoder3
+
+    Encoder1 --> CDN
+
+    Encoder2 --> CDN
+
+    Encoder3 --> CDN
 ```
 
 ---
 
-# Media Storage Architecture
+## Benefits
+
+* Parallel processing
+* Scalable encoding
+* Multi-resolution output
+
+---
+
+# Recommendation System
+
+YouTube-like systems are recommendation-heavy.
+
+---
+
+## Inputs
+
+* Watch history
+* Likes
+* Search history
+* Engagement signals
+
+---
+
+## Outputs
+
+* Personalized feed
+* Trending videos
+* Suggested content
+
+---
+
+## Architecture
+
+```mermaid id="yt_reco"
+flowchart LR
+
+    UserData
+
+    MLModel
+
+    VideoDB
+
+    Feed
+
+    UserData --> MLModel
+
+    VideoDB --> MLModel
+
+    MLModel --> Feed
+```
+
+---
+
+# Live Streaming Architecture
 
 ---
 
 ## Requirements
 
-* Massive scale storage
-* High durability
-* Fast retrieval
+* Real-time video ingestion
+* Low latency delivery
+* Viewer synchronization
 
 ---
 
-## Storage Strategy
+## Flow
 
-* Object storage (S3-like)
-* Multi-region replication
-* CDN caching
+```mermaid id="yt_live"
+flowchart TD
 
----
+    Broadcaster
 
-## Benefits
+    IngestServer
 
-* Scalable storage
-* Cost efficiency
-* High availability
-
----
-
-# CDN Strategy
-
-![CDN Architecture](../../assets/cache-strategy.png)
-
----
-
-## Cached Assets
-
-* Images
-* Videos
-* Thumbnails
-* Stories
-
----
-
-## Benefits
-
-* Reduced latency
-* Global access speed
-* Lower backend load
-
----
-
-# Story System Design
-
-Stories are:
-
-* Ephemeral content (24 hours)
-* High-frequency updates
-* Highly read-intensive
-
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-
-    User
-
-    StoryService
-
-    Cache
+    EncodingPipeline
 
     CDN
 
-    User --> StoryService
+    Viewers
 
-    StoryService --> Cache
+    Broadcaster --> IngestServer
 
-    Cache --> CDN
+    IngestServer --> EncodingPipeline
+
+    EncodingPipeline --> CDN
+
+    CDN --> Viewers
 ```
 
 ---
 
 ## Benefits
 
-* Fast retrieval
-* Time-based expiry
-* Reduced DB load
+* Real-time streaming
+* Scalable audience support
 
 ---
 
-# Database Design
+# Metadata Storage
 
-Core entities:
+Stores:
 
-* Users
-* Posts
-* Media
-* Comments
-* Likes
-* Follows
-* Stories
+* Video title
+* Description
+* Tags
+* Engagement metrics
+* Channel data
 
 ---
 
-## Scaling Strategy
+## Goals
 
-* Partition posts by user_id
-* Read replicas for feed queries
-* Separate media metadata store
-
----
-
-# Feed Ranking System
-
-Feed is not strictly chronological.
+* Fast queries
+* Search indexing
+* Analytics support
 
 ---
 
-## Ranking Signals
+# Search System
 
-* Engagement
-* Recency
-* User interest
-* Social proximity
+YouTube search is a large-scale indexing system.
 
 ---
 
-## Result
+## Features
 
-Personalized feed experience.
+* Keyword search
+* Ranking
+* Autocomplete
 
 ---
 
-# Realtime Interaction Layer
+## Architecture
 
-![Realtime Engine](../../assets/realtime-engine.png)
+* Elasticsearch / distributed index
+* Ranking layer
+* Cache for trending queries
+
+---
+
+# Watch History System
+
+Tracks user engagement.
 
 ---
 
 ## Use Cases
 
-* Likes
-* Comments
-* New followers
-* Story updates
-
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-
-    EventService
-
-    PubSub
-
-    SocketServer
-
-    Users
-
-    EventService --> PubSub
-
-    PubSub --> SocketServer
-
-    SocketServer --> Users
-```
+* Recommendations
+* Resume playback
+* Analytics
 
 ---
 
@@ -379,49 +433,47 @@ flowchart LR
 
 ---
 
-## Media Explosion
+## Video Storage Explosion
 
-High volume of uploads:
-
-```text
-Millions of images per day
+```text id="scale_storage"
+Petabytes of video content
 ```
 
 ---
 
-## Feed Fan-out Problem
+## Encoding Cost
 
-One post → millions of feeds
-
----
-
-## Story Expiry
-
-High churn content management
+CPU-intensive pipeline.
 
 ---
 
-## CDN Load
+## Global Bandwidth Demand
 
-Massive bandwidth usage
+High CDN pressure.
+
+---
+
+## Recommendation Load
+
+Heavy ML computation.
 
 ---
 
 # Optimization Strategies
 
-* Image compression
-* Lazy loading
-* CDN edge caching
-* Pre-signed URLs
-* Batch feed updates
+* Chunked uploads
+* Multi-region CDN
+* Precomputed recommendations
+* Lazy loading thumbnails
+* Adaptive bitrate streaming
 
 ---
 
 # Consistency Model
 
-Instagram-like systems use:
+YouTube-like systems use:
 
-```text
+```text id="yt_consistency"
 Eventual Consistency
 ```
 
@@ -429,7 +481,7 @@ Eventual Consistency
 
 ## Reason
 
-Availability and performance are prioritized over strict consistency.
+Scale and availability are prioritized over immediate consistency.
 
 ---
 
@@ -437,15 +489,15 @@ Availability and performance are prioritized over strict consistency.
 
 ---
 
-## Media upload failure
+## Upload failure
 
-Retry + background reprocessing
+Retry chunk uploads
 
 ---
 
-## Feed service failure
+## Encoding failure
 
-Fallback to direct DB query
+Retry pipeline job
 
 ---
 
@@ -455,39 +507,45 @@ Fallback to origin storage
 
 ---
 
+## Recommendation failure
+
+Fallback to trending videos
+
+---
+
 # Monitoring Strategy
 
 ![Monitoring Dashboard](../../assets/monitoring-dashboard.png)
 
 Track:
 
-* Upload latency
-* Feed generation time
+* Video upload success rate
+* Encoding latency
 * CDN hit ratio
-* Media processing delays
-* Engagement events
+* Buffering rate
+* Watch time metrics
 
 ---
 
 # Engineering Tradeoffs
 
-| Decision             | Benefit               | Tradeoff                      |
-| -------------------- | --------------------- | ----------------------------- |
-| CDN for media        | Fast delivery         | Cache invalidation complexity |
-| Fan-out on write     | Fast feed reads       | High write cost               |
-| Fan-out on read      | Scalable writes       | Complex reads                 |
-| Eventual consistency | Scalability           | Temporary stale feeds         |
-| Object storage       | Durable media storage | Retrieval latency             |
+| Decision               | Benefit     | Tradeoff                |
+| ---------------------- | ----------- | ----------------------- |
+| Chunked Uploads        | Reliability | Complexity              |
+| Transcoding Pipeline   | Quality     | Costly computation      |
+| CDN Delivery           | Low latency | Cache complexity        |
+| Eventual Consistency   | Scalability | Temporary inconsistency |
+| Recommendation Systems | Engagement  | High compute cost       |
 
 ---
 
 # System Design Insights
 
-* Media handling dominates complexity
-* CDN is critical to performance
-* Feed generation is hybrid
-* Stories require time-based architecture
-* Realtime engagement improves UX
+* Video pipelines dominate complexity
+* Encoding is the most expensive operation
+* CDN is critical for scalability
+* Recommendations drive engagement
+* Streaming requires adaptive delivery
 
 ---
 
@@ -495,15 +553,15 @@ Track:
 
 Strong candidates discuss:
 
-* CDN architecture
-* Media processing pipelines
-* Feed generation strategies
-* Fan-out tradeoffs
-* Story system design
-* Scaling challenges for media-heavy systems
+* Video encoding pipelines
+* CDN-based streaming
+* Chunked uploads
+* HLS/DASH protocols
+* Recommendation systems
+* Live streaming architecture
 
 ---
 
 # Engineering Outcome
 
-The Instagram-like system demonstrates how modern media platforms combine distributed storage, CDN-based delivery, hybrid feed generation, and realtime event systems to support massive-scale visual content consumption with high performance, global reach, and low latency user experience.
+The YouTube-like system demonstrates how large-scale video platforms combine distributed storage, encoding pipelines, global CDN delivery, and machine learning-driven recommendation systems to support massive video consumption at global scale with high reliability, performance, and scalability.
