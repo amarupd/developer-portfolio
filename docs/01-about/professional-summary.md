@@ -1,6 +1,6 @@
 # Professional Summary
 
-![Profile Overview](../../assets/profile-photo.png)
+![Profile Overview](../../assets/portfolio-banner.png)
 
 ## Overview
 
